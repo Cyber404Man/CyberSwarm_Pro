@@ -1,4 +1,3 @@
-
 # 🛡️ CyberSwarm Pro
 
 **منصة اختبار اختراق مؤتمتة بالكامل تعتمد على سرب من وكلاء الذكاء الاصطناعي المحليين.**
@@ -52,4 +51,90 @@ text
 - **Ollama** مع نموذج `qwen2.5:3b` (أو أي نموذج آخر تفضله)
 - أدوات اختبار الاختراق (على نظام Linux):
   ```bash
-  sudo apt install nmap whois dnsutils gobuster ffuf nikto + all possible tools 
+  sudo apt install nmap whois dnsutils gobuster ffuf nikto
+مستودع كلمات (wordlist):
+
+bash
+sudo apt install wordlists
+(أو استخدم /usr/share/wordlists/dirb/common.txt)
+
+🚀 التثبيت والتشغيل
+1. تحميل النموذج المحلي
+شغّل خدمة Ollama في طرفية:
+
+bash
+ollama serve
+ثم في طرفية أخرى حمّل النموذج:
+
+bash
+ollama pull qwen2.5:3b
+2. تثبيت المتطلبات
+bash
+pip install requests
+3. تشغيل الاختبار
+من مجلد المشروع:
+
+bash
+python3 test_orchestrator.py
+سيبدأ فحص تلقائي على 127.0.0.1 بنمط deep، وستشاهد مراحل الفحص وتنفيذ الأوامر مباشرة.
+
+🎛️ أنماط الفحص
+الوضع	المراحل
+quick	استطلاع → فحص منافذ → تعداد ويب
+deep	استطلاع → فحص منافذ → تعداد ويب → فحص ثغرات → استغلال → تقرير
+savage (قيد التطوير)	فحص شامل مع nuclei, sqlmap وأساليب هجومية أعمق
+🧠 كيف يعمل؟
+المنسق يحدد مراحل الفحص حسب الوضع.
+
+لكل مرحلة، يطلب من النموذج المحلي اقتراح أوامر مناسبة.
+
+وكيل متخصص يستخرج الأوامر الآمنة وينفذها عبر ToolManager.
+
+المخرجات تُحلل (حاليًا عبر النموذج) لاستخراج ثغرات بصيغة JSON.
+
+الثغرات تُجمع في ScanResult ويتم عرضها بعد اكتمال الفحص.
+
+🛠️ الأدوات المسموح بها حاليًا
+text
+nmap, gobuster, ffuf, nikto, whois, dig,
+curl, wget, nslookup, host, whatweb, wpscan
+⚠️ السلامة والأمان
+قائمة بيضاء تمنع تنفيذ أي أداة غير مصرح بها.
+
+مهلة زمنية لكل أمر لمنع التعليق.
+
+عدم إرسال أي بيانات إلى خدمات خارجية — كل شيء محلي.
+
+الفحص على أهداف محلية أولاً (مثل DVWA) للتطوير والاختبار.
+
+🧪 تجربة على هدف ضعيف (DVWA)
+لتجربة قوة السرب على بيئة تحتوي ثغرات حقيقية:
+
+bash
+docker run --rm -it -p 8080:80 vulnerables/web-dvwa
+ثم:
+
+افتح http://127.0.0.1:8080/setup.php وأنشئ قاعدة البيانات.
+
+سجّل الدخول: admin / password.
+
+من DVWA Security اختر low.
+
+عدّل في test_orchestrator.py:
+
+python
+target = "http://127.0.0.1:8080"
+mode = "deep"
+شغّل الاختبار.
+
+ستظهر لك ثغرات مثل SQL Injection و XSS و File Inclusion.
+
+🗺️ خارطة الطريق
+☑ الدماغ المحلي (Ollama)
+☑ المنسق الرئيسي
+☑ وكلاء متخصصون (recon, portscan, web enum, vuln scan)
+☑ مشغل أدوات آمن
+□ واجهة Streamlit احترافية (قيد التطوير)
+□ توليد تقارير PDF/JSON/Markdown
+□ وضع savage مع nuclei و sqlmap
+□ دعم نماذج سحابية اختيارية (API)
